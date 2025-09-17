@@ -1,6 +1,5 @@
 "use client";
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import React, { useEffect, useRef, useState } from "react";
 import { toPng } from "html-to-image";
 import {
   Card,
@@ -28,7 +27,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Copy,
   Download,
@@ -73,15 +71,15 @@ function download(filename: string, content: string, type = "text/html") {
 async function copyHtml(html: string) {
   try {
     // Prefer rich HTML copy for better paste into Outlook/Apple Mail/Gmail
-    // @ts-ignore
-    if (navigator.clipboard && window.ClipboardItem) {
-      // @ts-ignore
+    if (navigator.clipboard && 'ClipboardItem' in window) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const ClipboardItem = (window as any).ClipboardItem;
       const item = new ClipboardItem({
         "text/html": new Blob([html], { type: "text/html" }),
         "text/plain": new Blob([html.replace(/<[^>]+>/g, "")], { type: "text/plain" }),
       });
-      // @ts-ignore
-      await navigator.clipboard.write([item]);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await navigator.clipboard.write([item as any]);
     } else {
       await navigator.clipboard.writeText(html);
     }
@@ -219,7 +217,6 @@ function generateSignatureHTML(cfg: SignatureConfig) {
   const size = cfg.fontSize;
   const color = cfg.textColor;
   const link = cfg.linkColor;
-  const accent = cfg.accent;
   const spacing = cfg.spacing;
   const divider = cfg.showDivider
     ? `<tr><td colspan=\"2\" style=\"height:1px;line-height:1px;border-top:1px solid ${cfg.dividerColor};padding:${spacing}px 0\"></td></tr>`
@@ -470,7 +467,7 @@ export default function SignatureBuilderApp() {
     }
   }, [freeformMode, freeformHtml, config]);
 
-  const handleChange = (key: keyof SignatureConfig, value: any) =>
+  const handleChange = (key: keyof SignatureConfig, value: unknown) =>
     setConfig((c) => ({ ...c, [key]: value }));
 
   const addSocial = () =>
@@ -509,14 +506,14 @@ export default function SignatureBuilderApp() {
     }
   };
 
-  const onLogoUpload = async (file?: File | null) => {
+  const onLogoUpload = async (file: File | null | undefined) => {
     if (!file) return;
     const reader = new FileReader();
     reader.onload = () => handleChange("logoUrl", String(reader.result));
     reader.readAsDataURL(file);
   };
 
-  const onHeadshotUpload = async (file?: File | null) => {
+  const onHeadshotUpload = async (file: File | null | undefined) => {
     if (!file) return;
     const reader = new FileReader();
     reader.onload = () => handleChange("headshotUrl", String(reader.result));
@@ -654,7 +651,7 @@ export default function SignatureBuilderApp() {
                           <select
                             className="mt-1 w-full rounded-md border bg-background p-2 text-sm"
                             value={config.logoPosition}
-                            onChange={(e) => handleChange("logoPosition", e.target.value as any)}
+                            onChange={(e) => handleChange("logoPosition", e.target.value as "left" | "top")}
                           >
                             <option value="top">Top (above text)</option>
                             <option value="left">Left (beside text)</option>
@@ -668,7 +665,7 @@ export default function SignatureBuilderApp() {
                         <select
                           className="w-full rounded-md border bg-background p-2 text-sm"
                           value={config.separatorStyle}
-                          onChange={(e) => handleChange("separatorStyle", e.target.value as any)}
+                          onChange={(e) => handleChange("separatorStyle", e.target.value as "dot" | "pipe" | "slash" | "dash" | "none" | "custom")}
                         >
                           <option value="dot">• dot</option>
                           <option value="pipe">| pipe</option>
@@ -832,7 +829,7 @@ export default function SignatureBuilderApp() {
                     <AccordionTrigger>Paste/Export Options & Workflow</AccordionTrigger>
                     <AccordionContent>
                       <div className="space-y-2 text-sm text-muted-foreground">
-                        <p><strong>Copy as HTML</strong> works best for Apple Mail, Outlook for Mac, Gmail web. Outlook for Windows (desktop) often prefers "Paste Special → HTML" or using the downloaded <code>signature.html</code>.</p>
+                        <p><strong>Copy as HTML</strong> works best for Apple Mail, Outlook for Mac, Gmail web. Outlook for Windows (desktop) often prefers &quot;Paste Special → HTML&quot; or using the downloaded <code>signature.html</code>.</p>
                         <p><strong>PNG Export</strong> is convenient but not recommended for accessibility and dark mode; use HTML for clickable links.</p>
                         <p>To ensure links are tracked, set UTM parameters below.</p>
                         <div className="grid grid-cols-1 gap-2 pt-2">
