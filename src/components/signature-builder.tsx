@@ -102,7 +102,7 @@ function SignatureMarkup({ s }: { s: State }) {
 
   const showLogoCol = s.layout === "logo-left" && (s.logoUrl || (s.showHeadshot && s.headshotUrl));
 
-  const contactBits: Array<JSX.Element> = [];
+  const contactBits: Array<React.ReactElement> = [];
   if (s.phone) contactBits.push(<span key="p">{s.phone}</span>);
   if (s.email)
     contactBits.push(
